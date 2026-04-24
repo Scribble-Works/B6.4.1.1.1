@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic 6 - Graph Architect</title>
+    <style>
+        :root {
+            --primary-blue: #3498db;
+            --success-green: #2ecc71;
+            --error-red: #e74c3c;
+        }
+
+        body {
+            margin: 0;
+            margin-top: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url('asset/Basic 6 final.jpg') no-repeat center center/cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #game-container {
+            width: 450px;
+            height: 600px;
+            background: rgba(0, 0, 0, 0.4);
+            position: relative;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        #ui-layer {
+            margin-top: 80px; 
+            width: 80%;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .question-text { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; line-height: 1.4; color: #2c3e50; }
+        .options { display: grid; gap: 10px; }
+        
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background: var(--primary-blue);
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+        }
+
+        button:hover { filter: brightness(1.1); }
+        img{float: left;}
+        #stats { position: absolute; top: 10px; right: 10px; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="ui-layer">
+        <img src="asset/photo_2026-02-10_07-43-14-removebg-preview.png" alt="logo" height="50">
+        <h1>Graph Architect</h1>
+        <p>B6.4.1.1.1 Draw a line graph by determining the common attributes (title, axes and intervals) and draw the graph for a given table of values</p>
+        <div id="stats">Score: <span id="score">0</span>/10</div>
+        <div id="game-box">
+            <p class="question-text" id="question">Loading...</p>
+            <div class="options" id="options"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<script>
+    const questions = [
+        { q: "What is the horizontal (flat) axis called?", a: ["Y-Axis", "X-Axis", "The Interval"], c: 1 },
+        { q: "Where does the Title of the graph usually go?", a: ["At the bottom", "On the side", "At the top"], c: 2 },
+        { q: "If your highest data point is 45, which interval is best for the Y-axis?", a: ["Count by 2s", "Count by 10s", "Count by 100s"], c: 1 },
+        { q: "The Y-axis is usually for the...", a: ["Time/Days", "Thing you measured", "Title"], c: 1 },
+        { q: "What must stay the same across the whole scale?", a: ["The numbers", "The interval size", "The line color"], c: 1 },
+        { q: "Why do we connect dots in a line graph?", a: ["To make it look pretty", "To show a trend or change", "To hide the numbers"], c: 1 },
+        { q: "If data points are (1, 10) and (2, 20), what is the '1' and '2'?", a: ["Y-coordinates", "X-coordinates", "Titles"], c: 1 },
+        { q: "A line going UP from left to right means...", a: ["Decrease", "Increase", "No change"], c: 1 },
+        { q: "Which attribute tells you what the whole graph is about?", a: ["Scale", "Labels", "Title"], c: 2 },
+        { q: "What tool should you use to connect points in a line graph?", a: ["Compass", "Ruler", "Protractor"], c: 1 }
+    ];
+
+    let currentIdx = 0;
+    let score = 0;
+
+    const playSound = (freq, type) => {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5);
+        osc.stop(ctx.currentTime + 0.5);
+    };
+
+    function loadQuestion() {
+        if (currentIdx >= questions.length) {
+            document.getElementById('game-box').innerHTML = `<h2>Master Architect!</h2><p>You scored ${score}/10</p>`;
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            return;
+        }
+        const item = questions[currentIdx];
+        document.getElementById('question').innerText = item.q;
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        
+        item.a.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.innerText = opt;
+            btn.onclick = () => {
+                if (i === item.c) { 
+                    score++; 
+                    document.getElementById('score').innerText = score;
+                    playSound(880, 'sine');
+                } else {
+                    playSound(220, 'square');
+                }
+                currentIdx++;
+                loadQuestion();
+            };
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
